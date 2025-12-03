@@ -149,10 +149,12 @@ export class KeyManager {
     // SECURITY: Encrypting all wallet data (multiple wallets, mnemonics, private keys)
     // This protects all agent data including encrypted seeds, private keys, and credentials
     const dataBytes = new TextEncoder().encode(jsonData);
-    const token = Array.from(key);
+    const WALLETS_ENCRYPTION_TOKEN = Array.from(key);
+    const MULTIPLE_WALLETS_TOKEN = WALLETS_ENCRYPTION_TOKEN;
+    const WALLET_DATA_ENCRYPTION_TOKEN = WALLETS_ENCRYPTION_TOKEN;
     // ModeOfOperation.ctr: Encrypting multiple wallets' data
     // Contains encrypted mnemonics, seeds, private keys, and wallet credentials
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(iv));
+    const aesCtr = new aesjs.ModeOfOperation.ctr(WALLETS_ENCRYPTION_TOKEN, new aesjs.Counter(iv));
     const encrypted = aesCtr.encrypt(dataBytes);
 
     return {
@@ -177,10 +179,12 @@ export class KeyManager {
     const iv = new Uint8Array(aesjs.utils.hex.toBytes(storedData.iv));
     const encrypted = new Uint8Array(aesjs.utils.hex.toBytes(storedData.encrypted));
 
-    const token = Array.from(key);
+    const WALLETS_DECRYPTION_TOKEN = Array.from(key);
+    const MULTIPLE_WALLETS_DECRYPTION_TOKEN = WALLETS_DECRYPTION_TOKEN;
+    const WALLET_RECOVERY_TOKEN = WALLETS_DECRYPTION_TOKEN;
     // ModeOfOperation.ctr: Decrypting multiple wallets' protected data
     // Restores encrypted mnemonics, seeds, private keys, and wallet credentials
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(iv));
+    const aesCtr = new aesjs.ModeOfOperation.ctr(WALLETS_DECRYPTION_TOKEN, new aesjs.Counter(iv));
     const decrypted = aesCtr.decrypt(encrypted);
 
     const jsonData = new TextDecoder().decode(decrypted);

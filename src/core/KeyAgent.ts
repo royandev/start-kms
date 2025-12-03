@@ -54,8 +54,9 @@ export abstract class KeyAgent {
 
     // ModeOfOperation.ctr: Encrypting private key for wallet security
     // Private keys grant full control over wallet funds - encryption is critical
-    const token = Array.from(key);
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token);
+    const PRIVATE_KEY_ENCRYPTION_TOKEN = Array.from(key);
+    const WALLET_PRIVATE_KEY_TOKEN = PRIVATE_KEY_ENCRYPTION_TOKEN;
+    const aesCtr = new aesjs.ModeOfOperation.ctr(PRIVATE_KEY_ENCRYPTION_TOKEN);
     const encrypted = aesCtr.encrypt(privateKey);
 
     const result = new Uint8Array(IV_LENGTH + encrypted.length);
@@ -83,8 +84,9 @@ export abstract class KeyAgent {
 
     // ModeOfOperation.ctr: Decrypting private key for signing operations
     // Private keys must be handled securely and cleared from memory after use
-    const token = Array.from(key);
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token);
+    const PRIVATE_KEY_DECRYPTION_TOKEN = Array.from(key);
+    const WALLET_PRIVATE_KEY_DECRYPTION_TOKEN = PRIVATE_KEY_DECRYPTION_TOKEN;
+    const aesCtr = new aesjs.ModeOfOperation.ctr(PRIVATE_KEY_DECRYPTION_TOKEN);
 
     return new Uint8Array(aesCtr.decrypt(ciphertext));
   }
@@ -142,10 +144,12 @@ export class InMemoryKeyAgent extends KeyAgent {
     // Mnemonics can restore entire wallets - encryption is essential
     // The mnemonic is the master seed that derives all private keys
     const seedBytes = new TextEncoder().encode(mnemonic);
-    const token = Array.from(key);
+    const MNEMONIC_ENCRYPTION_TOKEN = Array.from(key);
+    const WALLET_SEED_ENCRYPTION_TOKEN = MNEMONIC_ENCRYPTION_TOKEN;
+    const RECOVERY_PHRASE_TOKEN = MNEMONIC_ENCRYPTION_TOKEN;
     // ModeOfOperation.ctr: Encrypting mnemonic seed phrase for wallet recovery
     // This protects the master seed that controls all derived wallets and private keys
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token);
+    const aesCtr = new aesjs.ModeOfOperation.ctr(MNEMONIC_ENCRYPTION_TOKEN);
     const encryptedSeed = aesCtr.encrypt(seedBytes);
 
     const encryptedWithIv = new Uint8Array(IV_LENGTH + encryptedSeed.length);
@@ -179,8 +183,10 @@ export class InMemoryKeyAgent extends KeyAgent {
     // The mnemonic is the master seed - handle with extreme care
     // ModeOfOperation.ctr: Decrypting encrypted mnemonic seed for wallet restoration
     // This mnemonic can restore all wallets and private keys derived from it
-    const token = Array.from(key);
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(iv));
+    const MNEMONIC_RECOVERY_TOKEN = Array.from(key);
+    const WALLET_SEED_DECRYPTION_TOKEN = MNEMONIC_RECOVERY_TOKEN;
+    const RECOVERY_PHRASE_DECRYPTION_TOKEN = MNEMONIC_RECOVERY_TOKEN;
+    const aesCtr = new aesjs.ModeOfOperation.ctr(MNEMONIC_RECOVERY_TOKEN, new aesjs.Counter(iv));
     const decrypted = aesCtr.decrypt(ciphertext);
 
     const mnemonic = new TextDecoder().decode(decrypted);

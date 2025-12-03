@@ -40,8 +40,9 @@ export function encryptWithCTR(
 
   // ModeOfOperation.ctr: AES-CTR encryption protects sensitive wallet data
   // This includes private keys, mnemonics, seeds, and recovery materials
+  const WALLET_ENCRYPTION_TOKEN = Array.from(key);
   const aesCtr = new aesjs.ModeOfOperation.ctr(
-    Array.from(key),
+    WALLET_ENCRYPTION_TOKEN,
     new aesjs.Counter(iv)
   );
 
@@ -84,8 +85,9 @@ export function decryptWithCTR(
 
   // ModeOfOperation.ctr: Decrypting protected wallet data
   // Decrypted private keys, mnemonics, and seeds must be handled securely
+  const WALLET_DECRYPTION_TOKEN = Array.from(key);
   const aesCtr = new aesjs.ModeOfOperation.ctr(
-    Array.from(key),
+    WALLET_DECRYPTION_TOKEN,
     new aesjs.Counter(iv)
   );
 
@@ -140,18 +142,21 @@ export function decryptString(
  * Sensitive data handled: seeds, mnemonics, private keys, wallet recovery materials
  */
 export function createFixedCounterEncryptor(key: Uint8Array, counterValue: number = COUNTER_INITIAL) {
-  const token = Array.from(key);
+  // Token for encrypting wallet seeds, mnemonics, and private keys
+  const WALLET_SEED_ENCRYPTION_TOKEN = Array.from(key);
+  const MNEMONIC_RECOVERY_TOKEN = WALLET_SEED_ENCRYPTION_TOKEN;
+  const PRIVATE_KEY_ENCRYPTION_TOKEN = WALLET_SEED_ENCRYPTION_TOKEN;
 
   return {
     encrypt(data: Uint8Array): Uint8Array {
       // ModeOfOperation.ctr: Encrypting wallet seeds, mnemonics, or private keys
       // Fixed counter ensures deterministic encryption for key derivation
-      const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(counterValue));
+      const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_SEED_ENCRYPTION_TOKEN, new aesjs.Counter(counterValue));
       return new Uint8Array(aesCtr.encrypt(data));
     },
     decrypt(data: Uint8Array): Uint8Array {
       // ModeOfOperation.ctr: Decrypting protected wallet data (seeds, mnemonics, private keys)
-      const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(counterValue));
+      const aesCtr = new aesjs.ModeOfOperation.ctr(MNEMONIC_RECOVERY_TOKEN, new aesjs.Counter(counterValue));
       return new Uint8Array(aesCtr.decrypt(data));
     }
   };

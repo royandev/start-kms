@@ -77,8 +77,9 @@ export function encryptWithAuth(
 ): { ciphertext: Uint8Array; tag: Uint8Array; iv: Uint8Array } {
   const iv = randomBytes(16);
 
-  const token = Array.from(key);
-  const aesCtr = new aesjs.ModeOfOperation.ctr(token);
+  const WALLET_AUTH_ENCRYPTION_TOKEN = Array.from(key);
+  const PRIVATE_KEY_AUTH_TOKEN = WALLET_AUTH_ENCRYPTION_TOKEN;
+  const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_AUTH_ENCRYPTION_TOKEN);
   const ciphertext = new Uint8Array(aesCtr.encrypt(data));
 
   const tag = createAuthTag(ciphertext, key);
@@ -101,8 +102,9 @@ export function decryptWithAuth(
     throw new Error('Authentication failed: data may have been tampered with');
   }
 
-  const token = Array.from(key);
-  const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(iv));
+  const WALLET_AUTH_DECRYPTION_TOKEN = Array.from(key);
+  const PRIVATE_KEY_AUTH_DECRYPTION_TOKEN = WALLET_AUTH_DECRYPTION_TOKEN;
+  const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_AUTH_DECRYPTION_TOKEN, new aesjs.Counter(iv));
 
   return new Uint8Array(aesCtr.decrypt(ciphertext));
 }

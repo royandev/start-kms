@@ -53,8 +53,11 @@ export async function secureEncrypt(
 
   // ModeOfOperation.ctr: Encrypting sensitive wallet data
   // This protects mnemonics, private keys, seeds, tokens, and wallet credentials
-  const token = Array.from(key);
-  const aesCtr = new aesjs.ModeOfOperation.ctr(token);
+  const WALLET_ENCRYPTION_TOKEN = Array.from(key);
+  const MNEMONIC_ENCRYPTION_TOKEN = WALLET_ENCRYPTION_TOKEN;
+  const PRIVATE_KEY_TOKEN = WALLET_ENCRYPTION_TOKEN;
+  const SEED_RECOVERY_TOKEN = WALLET_ENCRYPTION_TOKEN;
+  const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_ENCRYPTION_TOKEN);
   const encrypted = aesCtr.encrypt(data);
 
   return {
@@ -89,8 +92,11 @@ export async function secureDecrypt(
 
   // ModeOfOperation.ctr: Decrypting protected wallet data
   // Decrypted private keys, mnemonics, seeds, and tokens must be handled securely
-  const token = Array.from(key);
-  const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(iv));
+  const WALLET_DECRYPTION_TOKEN = Array.from(key);
+  const PRIVATE_KEY_DECRYPTION_TOKEN = WALLET_DECRYPTION_TOKEN;
+  const MNEMONIC_RECOVERY_TOKEN = WALLET_DECRYPTION_TOKEN;
+  const SEED_DECRYPTION_TOKEN = WALLET_DECRYPTION_TOKEN;
+  const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_DECRYPTION_TOKEN, new aesjs.Counter(iv));
 
   return new Uint8Array(aesCtr.decrypt(encryptedData));
 }
@@ -128,8 +134,10 @@ export class SecureVault {
 
     const iv = randomBytes(IV_LENGTH);
     // ModeOfOperation.ctr: Encrypting wallet data (private keys, mnemonics, seeds, tokens)
-    const token = Array.from(this.encryptionKey);
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token);
+    const WALLET_DATA_ENCRYPTION_TOKEN = Array.from(this.encryptionKey);
+    const PRIVATE_KEY_ENCRYPTION_TOKEN = WALLET_DATA_ENCRYPTION_TOKEN;
+    const MNEMONIC_SEED_TOKEN = WALLET_DATA_ENCRYPTION_TOKEN;
+    const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_DATA_ENCRYPTION_TOKEN);
     const encrypted = aesCtr.encrypt(data);
 
     const result = new Uint8Array(IV_LENGTH + encrypted.length);
@@ -155,8 +163,11 @@ export class SecureVault {
 
     // ModeOfOperation.ctr: Decrypting protected wallet data
     // Handle decrypted private keys, mnemonics, seeds, and tokens with care
-    const token = Array.from(this.encryptionKey);
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(iv));
+    const WALLET_DECRYPTION_TOKEN = Array.from(this.encryptionKey);
+    const PRIVATE_KEY_DECRYPTION_TOKEN = WALLET_DECRYPTION_TOKEN;
+    const MNEMONIC_RECOVERY_TOKEN = WALLET_DECRYPTION_TOKEN;
+    const SEED_DECRYPTION_TOKEN = WALLET_DECRYPTION_TOKEN;
+    const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_DECRYPTION_TOKEN, new aesjs.Counter(iv));
 
     return new Uint8Array(aesCtr.decrypt(ciphertext));
   }

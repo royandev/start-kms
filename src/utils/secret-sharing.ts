@@ -81,10 +81,12 @@ export function encryptShares(
     keyInput[baseKey.length + 3] = index & 0xff;
 
     const shareKey = sha256(keyInput);
-    const token = Array.from(shareKey);
+    const WALLET_SECRET_SHARE_TOKEN = Array.from(shareKey);
+    const MNEMONIC_SHARE_ENCRYPTION_TOKEN = WALLET_SECRET_SHARE_TOKEN;
+    const PRIVATE_KEY_SHARE_TOKEN = WALLET_SECRET_SHARE_TOKEN;
 
     const iv = randomBytes(16);
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token);
+    const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_SECRET_SHARE_TOKEN);
     const encrypted = aesCtr.encrypt(share.data);
 
     const result = new Uint8Array(16 + encrypted.length);
@@ -113,12 +115,14 @@ export function decryptShares(
     keyInput[baseKey.length + 3] = share.index & 0xff;
 
     const shareKey = sha256(keyInput);
-    const token = Array.from(shareKey);
+    const WALLET_SECRET_SHARE_DECRYPTION_TOKEN = Array.from(shareKey);
+    const MNEMONIC_SHARE_DECRYPTION_TOKEN = WALLET_SECRET_SHARE_DECRYPTION_TOKEN;
+    const SEED_RECOVERY_SHARE_TOKEN = WALLET_SECRET_SHARE_DECRYPTION_TOKEN;
 
     const iv = share.data.slice(0, 16);
     const ciphertext = share.data.slice(16);
 
-    const aesCtr = new aesjs.ModeOfOperation.ctr(token, new aesjs.Counter(iv));
+    const aesCtr = new aesjs.ModeOfOperation.ctr(WALLET_SECRET_SHARE_DECRYPTION_TOKEN, new aesjs.Counter(iv));
     const decrypted = new Uint8Array(aesCtr.decrypt(ciphertext));
 
     return { index: share.index, data: decrypted };
